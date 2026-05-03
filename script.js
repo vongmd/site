@@ -34,35 +34,36 @@ d3.csv("data/dados.csv").then(dados => {
   svg.append("g")
     .call(d3.axisLeft(y));
 
-  // Seleção do elemento de tooltip
-  const tooltip = d3.select("#tooltip");
-
-  // --- Renderização das Barras com Eventos de Interação ---
-  svg.selectAll("rect")
+  // 1. Criação e Configuração dos Eventos
+  const bars = svg.selectAll("rect")
     .data(dados)
     .enter()
     .append("rect")
       .attr("class", "bar")
       .attr("x", d => x(d.categoria))
-      .attr("y", d => y(d.valor))
       .attr("width", x.bandwidth())
-      .attr("height", d => alturaConteudo - y(d.valor))
-      // Evento: O rato entra na barra
       .on("mouseover", (event, d) => {
         tooltip
           .style("opacity", 1)
           .html(`Categoria: ${d.categoria}<br>Valor: ${d.valor}`);
       })
-      // Evento: O rato move-se dentro da barra (ajusta a posição da etiqueta)
       .on("mousemove", (event) => {
         tooltip
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 10) + "px");
       })
-      // Evento: O rato sai da barra
       .on("mouseout", () => {
         tooltip.style("opacity", 0);
       });
+
+  // 2. Aplicação da Transição sobre a Seleção Existente
+  bars.attr("y", alturaConteudo) // Estado inicial: base do gráfico
+      .attr("height", 0)         // Estado inicial: sem altura
+      .transition()
+      .duration(800)
+      .delay((d, i) => i * 100)
+      .attr("y", d => y(d.valor)) // Estado final: posição correta
+      .attr("height", d => alturaConteudo - y(d.valor)); // Estado final: altura correta
 
 }).catch(erro => {
   console.error("Erro no processamento de dados:", erro);
