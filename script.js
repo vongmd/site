@@ -11,6 +11,8 @@ const svg = d3.select("#visualizacao")
   .append("g")
     .attr("transform", `translate(${margem.esquerda}, ${margem.topo})`);
 
+const tooltip = d3.select("#tooltip");
+
 d3.csv("data/dados.csv").then(dados => {
   dados.forEach(d => d.valor = +d.valor);
 
@@ -23,48 +25,66 @@ d3.csv("data/dados.csv").then(dados => {
     .domain([0, d3.max(dados, d => d.valor)])
     .range([alturaConteudo, 0]);
 
-  // --- Implementação dos Eixos ---
-
-  // Eixo X (Posicionado no fundo)
   svg.append("g")
     .attr("transform", `translate(0, ${alturaConteudo})`)
     .call(d3.axisBottom(x));
 
-  // Eixo Y (Posicionado à esquerda)
   svg.append("g")
     .call(d3.axisLeft(y));
 
-  // 1. Criação e Configuração dos Eventos
-  const bars = svg.selectAll("rect")
+  // 1. Definição das barras (Seleção e Atributos Estáticos)
+  const barras = svg.selectAll("rect")
     .data(dados)
     .enter()
     .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => x(d.categoria))
-      .attr("width", x.bandwidth())
-      .on("mouseover", (event, d) => {
-        tooltip
-          .style("opacity", 1)
-          .html(`Categoria: ${d.categoria}<br>Valor: ${d.valor}`);
-      })
-      .on("mousemove", (event) => {
-        tooltip
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 10) + "px");
-      })
-      .on("mouseout", () => {
-        tooltip.style("opacity", 0);
-      });
+    .attr("class", "bar")
+    .attr("x", d => x(d.categoria))
+    .attr("width", x.bandwidth());
 
-  // 2. Aplicação da Transição sobre a Seleção Existente
-  bars.attr("y", alturaConteudo) // Estado inicial: base do gráfico
-      .attr("height", 0)         // Estado inicial: sem altura
+  // 2. Vinculação Manual de Eventos (Independente da Transição)
+  barras
+    .on("mouseover", function(event, d) {
+      tooltip
+        .style("opacity", 1)
+        .html(`<strong>Categoria:</strong> ${d.categoria}<br><strong>Valor:</strong> ${d.valor}`);
+    })
+    .on("mousemove", function(event) {
+      tooltip
+        .style("left", (event.pageX + 15) + "px")
+        .style("top", (event.pageY - 15) + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.style("opacity", 0);
+    });
+
+  // 3. Aplicação da Animação (Transição)
+  barras
+    .attr("y", alturaConteudo)
+    .attr("height", 0)
+    .transition()
+    .duration(800)
+    .delay((d, i) => i * 100)
+    .attr("y", d => y(d.valor))
+    .attr("height", d => alturaConteudo - y(d.valor));
+
+  // 4. Implementação de Rótulos de Dados com Transição Sincronizada
+  svg.selectAll(".label")
+    .data(dados)
+    .enter()
+    .append("text")
+      .attr("class", "label")
+      .attr("x", d => x(d.categoria) + x.bandwidth() / 2) // Centralização horizontal
+      .attr("y", alturaConteudo) // Posição inicial (base)
+      .attr("text-anchor", "middle") // Ancoragem central do texto
+      .style("font-family", "sans-serif")
+      .style("font-size", "11px")
+      .style("fill", "#555")
+      .text(d => d.valor) // Injeção do valor numérico
       .transition()
       .duration(800)
-      .delay((d, i) => i * 100)
-      .attr("y", d => y(d.valor)) // Estado final: posição correta
-      .attr("height", d => alturaConteudo - y(d.valor)); // Estado final: altura correta
+      .delay((d, i) => i * 100) // Sincronização com a animação das barras
+      .attr("y", d => y(d.valor) - 8); // Posição final (margem de 8px acima da barra)
 
 }).catch(erro => {
-  console.error("Erro no processamento de dados:", erro);
+  console.error("Erro técnico no carregamento:", erro);
 });
