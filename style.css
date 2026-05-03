@@ -1,0 +1,16 @@
+/* Definição estética das barras e transição suave de cor */
+.bar {
+    fill: steelblue;
+    transition: fill 0.2s ease-in-out;
+}
+
+/* Pseudo-classe para interação dinâmica */
+.bar:hover {
+    fill: #ff8c00; /* Cor laranja técnica */
+}
+
+/* Formatação tipográfica dos eixos */
+text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 11px;
+}

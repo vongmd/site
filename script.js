@@ -34,16 +34,16 @@ d3.csv("data/dados.csv").then(dados => {
   svg.append("g")
     .call(d3.axisLeft(y));
 
-  // --- Renderização das Barras ---
+  // --- Renderização das Barras com Atribuição de Classe ---
   svg.selectAll("rect")
     .data(dados)
     .enter()
     .append("rect")
+      .attr("class", "bar") // Atribui a classe definida no style.css
       .attr("x", d => x(d.categoria))
       .attr("y", d => y(d.valor))
       .attr("width", x.bandwidth())
-      .attr("height", d => alturaConteudo - y(d.valor))
-      .style("fill", "steelblue");
+      .attr("height", d => alturaConteudo - y(d.valor));
 
 }).catch(erro => {
   console.error("Erro no processamento de dados:", erro);
