@@ -1,17 +1,62 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualização D3.js</title>
+    <title>Vicente Duarte | Perfil Profissional</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>O meu projeto D3.js</h1>
-    <div id="visualizacao"></div>
+
+    <nav class="navbar">
+        <div class="logo">Vicente Duarte</div>
+        <ul class="nav-links">
+            <li><a href="#experiencia">EXPERIÊNCIA</a></li>
+            <li><a href="#formacao">FORMAÇÃO</a></li>
+            <li><a href="#competencias">COMPETÊNCIAS</a></li>
+            <li><a href="#contactos">CONTACTOS</a></li>
+        </ul>
+        
+        <div class="theme-switch-container">
+            <input type="checkbox" id="theme-slider" class="screen-reader" checked>
+            <label for="theme-slider" class="toggle">
+                <span class="label-dark">DARK</span>
+                <span class="label-light">LIGHT</span>
+                <span class="toggle-button"></span>
+            </label>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="profile-container">
+            <div class="profile-image"></div>
+            <div class="profile-details">
+                <h1 class="name">Vicente Duarte</h1>
+                <p class="role">IT PROFESSIONAL | ESPECIALISTA UAS</p>
+                
+                <div class="info-grid">
+                    <div class="info-item"><strong>E-mail:</strong> vicente.duarte@gmail.com</div>
+                    <div class="info-item"><strong>Telemóvel:</strong> +351 917667646</div>
+                    <div class="info-item"><strong>Localidade:</strong> Elvas, Portugal</div>
+                    <div class="info-item"><strong>Formação:</strong> Mestrando em Eng. Informática (UAb)</div>
+                </div>
+
+                <div class="social-footer">
+                    <a href="https://www.linkedin.com/in/vicente-duarte" target="_blank" class="linkedin-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="visualizacao-container" style="display:none;">
+        <div id="visualizacao"></div>
+    </div>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="script.js"></script>
-    <div id="tooltip"></div>
 </body>
 </html>

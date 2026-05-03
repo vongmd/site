@@ -1,90 +1,60 @@
-const margem = { topo: 20, direita: 20, baixo: 30, esquerda: 40 };
-const larguraTotal = 500;
-const alturaTotal = 300;
-const larguraConteudo = larguraTotal - margem.esquerda - margem.direita;
-const alturaConteudo = alturaTotal - margem.topo - margem.baixo;
+const themeSlider = document.getElementById('theme-slider');
 
-const svg = d3.select("#visualizacao")
-  .append("svg")
-    .attr("width", larguraTotal)
-    .attr("height", alturaTotal)
-  .append("g")
-    .attr("transform", `translate(${margem.esquerda}, ${margem.topo})`);
-
-const tooltip = d3.select("#tooltip");
-
-d3.csv("data/dados.csv").then(dados => {
-  dados.forEach(d => d.valor = +d.valor);
-
-  const x = d3.scaleBand()
-    .domain(dados.map(d => d.categoria))
-    .range([0, larguraConteudo])
-    .padding(0.2);
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(dados, d => d.valor)])
-    .range([alturaConteudo, 0]);
-
-  svg.append("g")
-    .attr("transform", `translate(0, ${alturaConteudo})`)
-    .call(d3.axisBottom(x));
-
-  svg.append("g")
-    .call(d3.axisLeft(y));
-
-  // 1. Definição das barras (Seleção e Atributos Estáticos)
-  const barras = svg.selectAll("rect")
-    .data(dados)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => x(d.categoria))
-    .attr("width", x.bandwidth());
-
-  // 2. Vinculação Manual de Eventos (Independente da Transição)
-  barras
-    .on("mouseover", function(event, d) {
-      tooltip
-        .style("opacity", 1)
-        .html(`<strong>Categoria:</strong> ${d.categoria}<br><strong>Valor:</strong> ${d.valor}`);
-    })
-    .on("mousemove", function(event) {
-      tooltip
-        .style("left", (event.pageX + 15) + "px")
-        .style("top", (event.pageY - 15) + "px");
-    })
-    .on("mouseout", function() {
-      tooltip.style("opacity", 0);
-    });
-
-  // 3. Aplicação da Animação (Transição)
-  barras
-    .attr("y", alturaConteudo)
-    .attr("height", 0)
-    .transition()
-    .duration(800)
-    .delay((d, i) => i * 100)
-    .attr("y", d => y(d.valor))
-    .attr("height", d => alturaConteudo - y(d.valor));
-
-  // 4. Implementação de Rótulos de Dados com Transição Sincronizada
-  svg.selectAll(".label")
-    .data(dados)
-    .enter()
-    .append("text")
-      .attr("class", "label")
-      .attr("x", d => x(d.categoria) + x.bandwidth() / 2) // Centralização horizontal
-      .attr("y", alturaConteudo) // Posição inicial (base)
-      .attr("text-anchor", "middle") // Ancoragem central do texto
-      .style("font-family", "sans-serif")
-      .style("font-size", "11px")
-      .style("fill", "#555")
-      .text(d => d.valor) // Injeção do valor numérico
-      .transition()
-      .duration(800)
-      .delay((d, i) => i * 100) // Sincronização com a animação das barras
-      .attr("y", d => y(d.valor) - 8); // Posição final (margem de 8px acima da barra)
-
-}).catch(erro => {
-  console.error("Erro técnico no carregamento:", erro);
+// Gestão de Tema e Redesenho do Gráfico
+themeSlider.addEventListener('change', () => {
+    const theme = themeSlider.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    render(); // Garante que as cores dos eixos do gráfico atualizam
 });
+
+function render() {
+    const container = d3.select("#visualizacao");
+    
+    // Se o elemento não existir no DOM (ex: na hero), a função ignora
+    if (container.empty()) return;
+
+    container.selectAll("*").remove();
+
+    const w = container.node().getBoundingClientRect().width;
+    const h = 250;
+    const margin = { t: 20, r: 10, b: 40, l: 40 };
+
+    const svg = container.append("svg")
+        .attr("viewBox", `0 0 ${w} ${h}`)
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    const data = [
+        { c: "Sistemas", v: 95 },
+        { c: "Redes", v: 90 },
+        { c: "UAS", v: 99 },
+        { c: "Ciberseg.", v: 85 },
+        { c: "Web", v: 80 }
+    ];
+
+    const x = d3.scaleBand()
+        .domain(data.map(d => d.c))
+        .range([0, w - margin.l - margin.r])
+        .padding(0.4);
+
+    const y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([h - margin.t - margin.b, 0]);
+
+    svg.append("g").attr("transform", `translate(0, ${h - margin.t - margin.b})`)
+       .call(d3.axisBottom(x)).attr("class", "axis");
+
+    svg.append("g").call(d3.axisLeft(y).ticks(5)).attr("class", "axis");
+
+    svg.selectAll(".bar")
+        .data(data).enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.c))
+        .attr("width", x.bandwidth())
+        .attr("y", d => y(d.v))
+        .attr("height", d => (h - margin.t - margin.b) - y(d.v));
+}
+
+// Inicialização
+render();
+window.addEventListener('resize', render);
